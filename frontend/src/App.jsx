@@ -7,9 +7,14 @@ import Review from './pages/Review'
 import Analytics from './pages/Analytics'
 import Assistant from './pages/Assistant'
 import Tasks from './pages/Tasks'
+import Timeline from './pages/Timeline'
+import Goals from './pages/Goals'
+import Habits from './pages/Habits'
+import Summary from './pages/Summary'
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'))
+  const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -30,19 +35,24 @@ function App() {
         <div className="nav-brand">
           <Link to="/">🧠 MnemoSphere</Link>
         </div>
-        <div className="nav-links">
+        <button className="nav-toggle" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+        <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
           {token ? (
             <>
-              <Link to="/dashboard">Dashboard</Link>
-              <Link to="/notes">Notes</Link>
-              <Link to="/review">Review</Link>
-              <Link to="/analytics">Analytics</Link>
-              <Link to="/tasks">Tasks</Link>
-              <Link to="/assistant">AI Assistant</Link>
-              <button className="btn btn-outline" onClick={handleLogout}>Logout</button>
+              <Link to="/dashboard" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+              <Link to="/notes" onClick={() => setMenuOpen(false)}>Notes</Link>
+              <Link to="/review" onClick={() => setMenuOpen(false)}>Review</Link>
+              <Link to="/timeline" onClick={() => setMenuOpen(false)}>Timeline</Link>
+              <Link to="/goals" onClick={() => setMenuOpen(false)}>Goals</Link>
+              <Link to="/habits" onClick={() => setMenuOpen(false)}>Habits</Link>
+              <Link to="/summary" onClick={() => setMenuOpen(false)}>Summary</Link>
+              <Link to="/analytics" onClick={() => setMenuOpen(false)}>Analytics</Link>
+              <Link to="/tasks" onClick={() => setMenuOpen(false)}>Tasks</Link>
+              <Link to="/assistant" onClick={() => setMenuOpen(false)}>AI</Link>
+              <button className="btn btn-outline" onClick={() => { handleLogout(); setMenuOpen(false) }}>Logout</button>
             </>
           ) : (
-            <Link to="/" className="btn btn-primary">Login</Link>
+            <Link to="/" className="btn btn-primary" onClick={() => setMenuOpen(false)}>Login</Link>
           )}
         </div>
       </nav>
@@ -55,6 +65,10 @@ function App() {
           <Route path="/analytics" element={<Analytics token={token} />} />
           <Route path="/tasks" element={<Tasks token={token} />} />
           <Route path="/assistant" element={<Assistant token={token} />} />
+          <Route path="/timeline" element={<Timeline token={token} />} />
+          <Route path="/goals" element={<Goals token={token} />} />
+          <Route path="/habits" element={<Habits token={token} />} />
+          <Route path="/summary" element={<Summary token={token} />} />
         </Routes>
       </main>
     </div>

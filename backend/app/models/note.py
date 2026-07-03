@@ -18,6 +18,7 @@ class NoteResponse(BaseModel):
     summary: Optional[str] = None
     source_type: str
     tags: list[str]
+    category: str = "general"
     created_at: datetime
     next_review: Optional[datetime] = None
     review_stage: int = 0

@@ -104,5 +104,27 @@ class LLMService:
         ]
         return await self._call_groq(messages)
 
+    async def categorize(self, title: str, content: str, existing_tags: str) -> dict:
+        messages = [
+            {"role": "system", "content": f"{SYSTEM_PROMPT} Categorize this note. Return valid JSON with keys: category (one of: study, work, personal, health, finance, technology, ideas, general), tags (array of 2-4 relevant keywords), suggested_summary (one sentence)."},
+            {"role": "user", "content": f"Title: {title}\nContent: {content[:1000]}\nExisting tags: {existing_tags}"},
+        ]
+        raw = await self._call_groq(messages)
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {"category": "general", "tags": [], "suggested_summary": ""}
+
+    async def analyze_image(self, base64_image: str) -> str:
+        if self._mock_mode:
+            return "Uploaded image. Set GROQ_API_KEY for AI-powered image analysis and text extraction."
+        messages = [
+            {"role": "user", "content": [
+                {"type": "text", "text": "Extract all text from this image and describe what you see in detail."},
+                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
+            ]},
+        ]
+        return await self._call_groq(messages)
+
 
 llm = LLMService()

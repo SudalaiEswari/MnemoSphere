@@ -9,7 +9,9 @@ export default function Notes({ token }) {
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState(null)
   const [listening, setListening] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const recognitionRef = useRef(null)
+  const fileRef = useRef(null)
 
   useEffect(() => {
     if (token) loadNotes()
@@ -32,6 +34,23 @@ export default function Notes({ token }) {
     loadNotes()
   }
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const form = new FormData()
+    form.append('token', token)
+    form.append('title', file.name)
+    form.append('file', file)
+    try {
+      await axios.post('/api/notes/upload', form)
+      loadNotes()
+    } catch (err) {
+      alert('Upload failed: ' + (err.response?.data?.detail || err.message))
+    }
+    setUploading(false)
+  }
+
   const handleDelete = async (id) => {
     await axios.delete(`/api/notes/${id}`, { params: { token } })
     loadNotes()
@@ -44,6 +63,12 @@ export default function Notes({ token }) {
   }
 
   const displayNotes = searchResults !== null ? searchResults : notes
+
+  const sourceIcon = (s) => {
+    if (s === 'image') return '🖼️'
+    if (s === 'file') return '📎'
+    return '📝'
+  }
 
   return (
     <div>
@@ -64,9 +89,15 @@ export default function Notes({ token }) {
             }} title="Voice input for title">🎤</button>
           </div>
           {listening && <p style={{ color: 'var(--danger)', fontSize: '0.9rem' }}>Listening...</p>}
-          <textarea placeholder="Write your note here... (paste text, or describe what you learned)" value={content} onChange={e => setContent(e.target.value)} required />
+          <textarea placeholder="Write your note here... (or paste text from documents/images)" value={content} onChange={e => setContent(e.target.value)} required />
           <input placeholder="Tags (comma-separated, e.g. python, algorithms)" value={tags} onChange={e => setTags(e.target.value)} />
-          <button type="submit" className="btn btn-primary">Save Note</button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button type="submit" className="btn btn-primary">Save Note</button>
+            <button type="button" className="btn btn-outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
+              {uploading ? 'Uploading...' : '📎 Upload File/Image'}
+            </button>
+            <input ref={fileRef} type="file" accept="image/*,.pdf,.txt,.doc,.docx" style={{ display: 'none' }} onChange={handleFileUpload} />
+          </div>
         </form>
       </div>
 
@@ -77,12 +108,13 @@ export default function Notes({ token }) {
       </div>
 
       {displayNotes.length === 0 ? (
-        <div className="empty-state">No notes yet. Add your first note above!</div>
+        <div className="empty-state">No notes yet. Add your first note above or upload a file!</div>
       ) : (
         <div className="grid">
           {displayNotes.map(note => (
             <div key={note.id} className="card">
-              <h3>{note.title}</h3>
+              <h3>{sourceIcon(note.source_type)} {note.title}</h3>
+              {note.category && <span className="tag" style={{ background: 'rgba(108,92,231,0.1)', color: 'var(--primary)' }}>{note.category}</span>}
               {note.summary && <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', margin: '0.5rem 0' }}>{note.summary}</p>}
               <div style={{ margin: '0.5rem 0' }}>
                 {note.tags?.map(t => <span key={t} className="tag">{t}</span>)}
