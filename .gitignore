@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.env
+*.egg-info/
+.venv/
+venv/
+chroma_store/
+vector_store/
+data/vector_store/
+data/uploads/
+*.db
+.DS_Store
+Thumbs.db
+*.log
