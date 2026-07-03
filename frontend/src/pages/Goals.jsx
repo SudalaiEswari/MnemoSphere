@@ -46,7 +46,7 @@ export default function Goals({ token }) {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>Goals 🎯</h1>
+      <div className="page-header"><h1>Goals 🎯</h1><p>Set targets, track progress, achieve more</p></div>
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h2 style={{ marginBottom: '1rem' }}>New Goal</h2>

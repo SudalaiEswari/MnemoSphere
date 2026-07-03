@@ -14,13 +14,29 @@ export default function Home({ token, setToken }) {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
+  if (token) {
+    return (
+      <div className="hero">
+        <div className="hero-badge">✨ Welcome back</div>
+        <h1>Your Memory<br/>Assistant</h1>
+        <p>MnemoSphere is ready. Head to your dashboard to review notes, check tasks, or chat with your AI assistant.</p>
+        <a href="/dashboard" className="btn btn-primary btn-lg">Go to Dashboard →</a>
+        <div className="features">
+          <div className="feature-card"><span className="icon">📝</span><h3>Notes</h3><p>Capture ideas with AI categorization</p></div>
+          <div className="feature-card"><span className="icon">🔄</span><h3>1-3-7 Review</h3><p>Spaced repetition for long-term memory</p></div>
+          <div className="feature-card"><span className="icon">🎯</span><h3>Goals & Habits</h3><p>Track progress and build routines</p></div>
+        </div>
+      </div>
+    )
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     try {
-      const data = isLogin
-        ? await API('/auth/login', { email, password })
-        : await API('/auth/register', { email, password, name })
+      const url = isLogin ? '/api/auth/login' : '/api/auth/register'
+      const body = isLogin ? { email, password } : { email, password, name }
+      const { data } = await axios.post(url, body)
       localStorage.setItem('token', data.access_token)
       localStorage.setItem('userId', data.user_id)
       setToken(data.access_token)
@@ -30,58 +46,50 @@ export default function Home({ token, setToken }) {
     }
   }
 
-  if (token) {
-    navigate('/dashboard')
-    return null
-  }
-
   return (
     <div>
       <div className="hero">
+        <div className="hero-badge">🧠 AI-Powered Memory</div>
         <h1>MnemoSphere</h1>
-        <p>Your AI-powered memory assistant. Upload notes, get AI summaries, and review using the 1-3-7 spaced repetition method to never forget what matters.</p>
+        <p>Never forget what matters. AI-powered notes, 1-3-7 spaced repetition, smart search, and your personal memory assistant.</p>
       </div>
-      <div className="features">
-        <div className="card feature-card">
-          <div className="icon">📝</div>
-          <h3>Smart Notes</h3>
-          <p>Upload text, PDFs, voice transcripts, or images. AI extracts and organizes key information.</p>
-        </div>
-        <div className="card feature-card">
-          <div className="icon">🤖</div>
-          <h3>AI Quiz Generator</h3>
-          <p>Generate personalized quizzes from your notes. Active recall strengthens memory retention.</p>
-        </div>
-        <div className="card feature-card">
-          <div className="icon">📅</div>
-          <h3>1-3-7 Review</h3>
-          <p>Automatically reminded to review after 1, 3, and 7 days. Scientifically proven spaced repetition.</p>
-        </div>
-        <div className="card feature-card">
-          <div className="icon">📊</div>
-          <h3>Memory Analytics</h3>
-          <p>Track your memory score, topic mastery, revision history, and personalized recommendations.</p>
-        </div>
-      </div>
-      <div className="auth-form card">
-        <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-        {error && <p style={{ color: 'var(--danger)', marginBottom: '1rem' }}>{error}</p>}
+      <div className="auth-form">
+        <h2>{isLogin ? 'Welcome Back' : 'Get Started'}</h2>
+        <p className="subtitle">{isLogin ? 'Sign in to your memory sphere' : 'Create your memory sphere'}</p>
+        {error && <div style={{ padding: '0.75rem', background: 'rgba(239,71,111,0.1)', borderRadius: 'var(--radius-sm)', color: 'var(--danger)', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</div>}
         <form onSubmit={handleSubmit}>
           {!isLogin && (
-            <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} required />
+            <div>
+              <label>Name</label>
+              <input placeholder="Your name" value={name} onChange={e => setName(e.target.value)} required />
+            </div>
           )}
-          <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            {isLogin ? 'Sign In' : 'Register'}
+          <div>
+            <label>Email</label>
+            <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
+          </div>
+          <div>
+            <label>Password</label>
+            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+          </div>
+          <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}>
+            {isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
-        <p style={{ textAlign: 'center', marginTop: '1rem', color: 'var(--text-light)' }}>
+        <p style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
           {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button className="btn btn-outline" onClick={() => setIsLogin(!isLogin)} style={{ marginLeft: '0.5rem' }}>
-            {isLogin ? 'Register' : 'Sign In'}
+          <button className="btn btn-secondary btn-sm" onClick={() => setIsLogin(!isLogin)} style={{ display: 'inline-flex', marginLeft: '0.25rem' }}>
+            {isLogin ? 'Sign Up' : 'Sign In'}
           </button>
         </p>
+      </div>
+      <div className="features" style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}>
+        <div className="feature-card"><span className="icon">🧠</span><h3>Smart Memory</h3><p>1-3-7 spaced repetition optimizes recall</p></div>
+        <div className="feature-card"><span className="icon">🤖</span><h3>AI Assistant</h3><p>Chat with your notes, get summaries, quizzes</p></div>
+        <div className="feature-card"><span className="icon">📊</span><h3>Analytics</h3><p>Track memory scores, topics, and streaks</p></div>
+        <div className="feature-card"><span className="icon">🎯</span><h3>Goals & Habits</h3><p>Set goals, build habits, stay on track</p></div>
+        <div className="feature-card"><span className="icon">🔍</span><h3>Smart Search</h3><p>Find anything with vector search</p></div>
+        <div className="feature-card"><span className="icon">📎</span><h3>File Upload</h3><p>Images, docs, auto-extracted text</p></div>
       </div>
     </div>
   )

@@ -32,9 +32,9 @@ export default function Timeline({ token }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1 style={{ margin: 0 }}>Timeline</h1>
-        <select value={days} onChange={e => setDays(Number(e.target.value))} className="btn btn-outline" style={{ width: 'auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className="page-header" style={{ margin: 0 }}><h1>Timeline</h1><p>Your complete activity history</p></div>
+        <select value={days} onChange={e => setDays(Number(e.target.value))} className="btn btn-outline btn-sm" style={{ width: 'auto' }}>
           <option value={7}>Last 7 days</option>
           <option value={30}>Last 30 days</option>
           <option value={90}>Last 90 days</option>

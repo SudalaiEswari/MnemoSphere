@@ -14,7 +14,7 @@ export default function Analytics({ token }) {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>Analytics</h1>
+      <div className="page-header"><h1>Analytics</h1><p>Memory scores, topics mastered, and progress</p></div>
       <div className="grid">
         <div className="card stat-card">
           <h3>{data.total_notes}</h3>

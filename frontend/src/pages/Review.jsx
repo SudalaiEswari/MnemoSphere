@@ -88,10 +88,10 @@ export default function Review({ token }) {
   if (dueNotes.length === 0) {
     return (
       <div>
-        <h1 style={{ marginBottom: '1.5rem' }}>Review</h1>
+        <div className="page-header"><h1>Review</h1><p>Active recall quizzes for long-term memory</p></div>
         <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
           <h2>All caught up! 🎉</h2>
-          <p style={{ color: 'var(--text-light)', marginTop: '0.5rem' }}>No notes due for review. Add more notes or check back later.</p>
+          <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>No notes due for review. Add more notes or check back later.</p>
         </div>
       </div>
     )
@@ -102,9 +102,9 @@ export default function Review({ token }) {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>Review</h1>
+      <div className="page-header"><h1>Review</h1><p>Active recall quizzes for long-term memory</p></div>
       <div className="card" style={{ marginBottom: '1rem' }}>
-        <p style={{ color: 'var(--text-light)' }}>
+        <p style={{ color: 'var(--text-muted)' }}>
           Reviewing: <strong>{note?.title}</strong> · Stage {note?.stage}/3 · Note {currentIndex + 1} of {dueNotes.length}
         </p>
       </div>

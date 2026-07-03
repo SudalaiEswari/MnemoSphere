@@ -38,7 +38,7 @@ export default function Habits({ token }) {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>Habits 🔄</h1>
+      <div className="page-header"><h1>Habits 🔄</h1><p>Build routines with daily check-ins and streaks</p></div>
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h2 style={{ marginBottom: '1rem' }}>New Habit</h2>

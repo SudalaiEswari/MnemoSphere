@@ -16,103 +16,104 @@ export default function Dashboard({ token }) {
     axios.get('/api/notes/', { params: { token } }).then(r => setNotes(r.data))
   }, [token])
 
-  if (!analytics) return <div className="loading">Loading dashboard...</div>
+  if (!analytics) return <div className="loading">Loading dashboard</div>
 
   const pendingTasks = tasks.filter(t => t.status !== 'completed')
   const overdueTasks = tasks.filter(t => t.deadline && new Date(t.deadline) < new Date() && t.status !== 'completed')
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>Dashboard</h1>
+      <div className="page-header">
+        <h1>Dashboard</h1>
+        <p>Your memory health at a glance</p>
+      </div>
+
       <div className="grid">
-        <div className="card stat-card">
-          <h3>{analytics.total_notes}</h3>
-          <p>Total Notes</p>
-        </div>
-        <div className="card stat-card">
-          <h3>{analytics.total_reviews}</h3>
-          <p>Reviews Done</p>
-        </div>
-        <div className="card stat-card">
-          <h3>{analytics.memory_score}%</h3>
-          <p>Memory Score</p>
-        </div>
-        <div className="card stat-card">
-          <h3>{analytics.reviews_due}</h3>
-          <p>Reviews Due</p>
-        </div>
-        <div className="card stat-card" style={{ borderLeft: '4px solid #e17055' }}>
-          <h3>{overdueTasks.length}</h3>
+        <div className="card stat-card"><h3>{analytics.total_notes}</h3><p>Total Notes</p></div>
+        <div className="card stat-card"><h3>{analytics.total_reviews}</h3><p>Reviews Done</p></div>
+        <div className="card stat-card"><h3>{analytics.memory_score}%</h3><p>Memory Score</p></div>
+        <div className="card stat-card"><h3>{analytics.reviews_due}</h3><p>Reviews Due</p></div>
+        <div className="card stat-card" style={{background: 'var(--bg-card)'}}>
+          <h3 style={{ background: 'var(--gradient-warm)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{overdueTasks.length}</h3>
           <p>Overdue Tasks</p>
         </div>
-        <div className="card stat-card">
-          <h3>{pendingTasks.length}</h3>
-          <p>Pending Tasks</p>
-        </div>
+        <div className="card stat-card"><h3>{pendingTasks.length}</h3><p>Pending Tasks</p></div>
       </div>
 
-      {/* Timeline: Recent Activity */}
-      <div className="card" style={{ marginTop: '2rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>Recent Activity</h2>
-        <div style={{ position: 'relative', paddingLeft: '2rem' }}>
-          <div style={{ position: 'absolute', left: '0.5rem', top: 0, bottom: 0, width: '2px', background: 'var(--primary)', opacity: 0.3 }} />
-          {[...notes.slice(0, 5), ...tasks.slice(0, 5)].sort((a, b) => {
-            const dateA = a.created_at || a.next_review
-            const dateB = b.created_at || b.next_review
-            return new Date(dateB) - new Date(dateA)
-          }).slice(0, 8).map((item, i) => (
-            <div key={i} style={{ position: 'relative', padding: '0.5rem 0 0.5rem 1.5rem', borderBottom: '1px solid #f0f0f0' }}>
-              <div style={{ position: 'absolute', left: '-1.35rem', top: '0.8rem', width: '12px', height: '12px', borderRadius: '50%', background: item.title ? 'var(--primary)' : 'var(--secondary)', border: '2px solid white' }} />
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>
-                {item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}
-                {' '}{item.source_type ? '📝 Note' : '📋 Task'}
-              </p>
-              <p style={{ fontWeight: 500 }}>{item.title}</p>
-              {item.summary && <p style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>{item.summary}</p>}
-            </div>
-          ))}
+      {analytics.reviews_due > 0 && (
+        <div className="card" style={{ marginTop: '1.5rem', borderLeft: '3px solid var(--warning)', background: 'rgba(255, 209, 102, 0.04)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <span>⚠️ <strong>{analytics.reviews_due}</strong> {analytics.reviews_due === 1 ? 'review is' : 'reviews are'} due for reinforcement</span>
+            <Link to="/review" className="btn btn-primary btn-sm">Start Review</Link>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="grid" style={{ marginTop: '2rem' }}>
-        {dueReviews.length > 0 && (
-          <div className="card">
-            <h3>Due for Review</h3>
-            {dueReviews.slice(0, 3).map(note => (
-              <div key={note.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #f0f0f0' }}>
-                <p style={{ fontWeight: 500 }}>{note.title}</p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>Stage {note.stage}/3</p>
+      <div className="grid" style={{ marginTop: '1.5rem' }}>
+        <div className="card">
+          <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Recent Activity</h3>
+          <div style={{ position: 'relative', paddingLeft: '1.5rem' }}>
+            <div className="timeline-line" />
+            {[...notes.slice(0, 5), ...tasks.slice(0, 5)].sort((a, b) => {
+              return new Date(b.created_at || 0) - new Date(a.created_at || 0)
+            }).slice(0, 6).map((item, i) => (
+              <div key={i} style={{ position: 'relative', padding: '0.6rem 0 0.6rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="timeline-dot" style={{ color: item.title ? 'var(--primary)' : 'var(--secondary)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.15rem' }}>
+                  {item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}
+                  {' '}{item.source_type ? '📝' : '📋'}
+                </p>
+                <p style={{ fontWeight: 500, fontSize: '0.9rem' }}>{item.title}</p>
+                {item.summary && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>{item.summary}</p>}
               </div>
             ))}
-            {dueReviews.length > 0 && <Link to="/review" className="btn btn-primary" style={{ marginTop: '0.5rem', width: '100%' }}>Review All</Link>}
+            {notes.length === 0 && tasks.length === 0 && <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>No activity yet</p>}
           </div>
-        )}
+          {(notes.length > 0 || tasks.length > 0) && (
+            <Link to="/timeline" className="btn btn-secondary btn-sm" style={{ width: '100%', justifyContent: 'center', marginTop: '0.75rem' }}>View Full Timeline →</Link>
+          )}
+        </div>
 
-        {pendingTasks.length > 0 && (
-          <div className="card">
-            <h3>Upcoming Tasks</h3>
-            {pendingTasks.slice(0, 5).map(task => (
-              <div key={task.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <p style={{ fontWeight: 500, fontSize: '0.9rem' }}>{task.title}</p>
-                  {task.deadline && <p style={{ fontSize: '0.8rem', color: new Date(task.deadline) < new Date() ? 'var(--danger)' : 'var(--text-light)' }}>
-                    {new Date(task.deadline).toLocaleDateString()}
-                  </p>}
+        <div>
+          {dueReviews.length > 0 && (
+            <div className="card" style={{ marginBottom: '1rem' }}>
+              <h3 style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Due for Review</h3>
+              {dueReviews.slice(0, 4).map(note => (
+                <div key={note.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  <p style={{ fontWeight: 500, fontSize: '0.9rem' }}>{note.title}</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Stage {note.stage}/3</p>
                 </div>
-                <span className="tag" style={{ background: task.priority === 'high' ? 'rgba(225,112,85,0.1)' : 'rgba(0,0,0,0.05)', color: task.priority === 'high' ? 'var(--danger)' : 'var(--text-light)' }}>
-                  {task.priority}
-                </span>
-              </div>
-            ))}
-            <Link to="/tasks" className="btn btn-outline" style={{ marginTop: '0.5rem', width: '100%' }}>View All Tasks</Link>
-          </div>
-        )}
+              ))}
+              <Link to="/review" className="btn btn-primary btn-sm" style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}>Review All</Link>
+            </div>
+          )}
+
+          {pendingTasks.length > 0 && (
+            <div className="card">
+              <h3 style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Upcoming Tasks</h3>
+              {pendingTasks.slice(0, 4).map(task => (
+                <div key={task.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <p style={{ fontWeight: 500, fontSize: '0.85rem' }}>{task.title}</p>
+                    {task.deadline && <p style={{ fontSize: '0.75rem', color: new Date(task.deadline) < new Date() ? 'var(--danger)' : 'var(--text-dim)' }}>
+                      {new Date(task.deadline).toLocaleDateString()}
+                    </p>}
+                  </div>
+                  <span className={`tag ${task.priority === 'high' ? '' : ''}`} style={{ background: task.priority === 'high' ? 'rgba(239,71,111,0.12)' : 'rgba(255,255,255,0.04)', color: task.priority === 'high' ? 'var(--danger)' : 'var(--text-muted)' }}>
+                    {task.priority}
+                  </span>
+                </div>
+              ))}
+              <Link to="/tasks" className="btn btn-secondary btn-sm" style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}>All Tasks →</Link>
+            </div>
+          )}
+        </div>
       </div>
 
-      {analytics.topics_mastered.length > 0 && (
-        <div style={{ marginTop: '2rem' }}>
-          <h2 style={{ marginBottom: '1rem' }}>Topics Mastered</h2>
-          {analytics.topics_mastered.map(t => <span key={t} className="tag">{t}</span>)}
+      {analytics.topics_mastered?.length > 0 && (
+        <div className="card" style={{ marginTop: '1.5rem' }}>
+          <h3 style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>🏆 Topics Mastered</h3>
+          {analytics.topics_mastered.map(t => <span key={t} className="tag tag-study">{t}</span>)}
         </div>
       )}
     </div>

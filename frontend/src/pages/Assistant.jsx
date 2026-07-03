@@ -26,12 +26,7 @@ export default function Assistant({ token }) {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>AI Assistant</h1>
-      <div className="card" style={{ marginBottom: '1rem' }}>
-        <p style={{ color: 'var(--text-light)' }}>
-          Ask questions about your notes. The AI searches your knowledge base and answers based on what you've learned.
-        </p>
-      </div>
+      <div className="page-header"><h1>AI Assistant</h1><p>Chat with your memory — ask questions, get insights</p></div>
       <div className="card" style={{ minHeight: '400px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem' }}>
           {messages.length === 0 && (
@@ -44,7 +39,7 @@ export default function Assistant({ token }) {
           {messages.map((msg, i) => (
             <div key={i} style={{
               marginBottom: '1rem', padding: '1rem', borderRadius: '12px',
-              background: msg.role === 'user' ? 'rgba(108,92,231,0.08)' : '#f0f0ff',
+              background: msg.role === 'user' ? 'rgba(124,92,252,0.12)' : 'rgba(255,255,255,0.04)',
               maxWidth: '85%', marginLeft: msg.role === 'user' ? 'auto' : '0',
             }}>
               <p style={{ fontWeight: 600, marginBottom: '0.3rem', color: msg.role === 'user' ? 'var(--primary)' : 'var(--secondary)' }}>

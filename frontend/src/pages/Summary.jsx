@@ -16,7 +16,7 @@ export default function Summary({ token }) {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>Summary 📊</h1>
+      <div className="page-header"><h1>Summary 📊</h1><p>Daily stats and weekly AI-powered insights</p></div>
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         <button className={`btn ${tab === 'daily' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setTab('daily')}>Daily</button>

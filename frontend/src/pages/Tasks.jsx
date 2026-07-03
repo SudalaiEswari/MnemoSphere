@@ -67,9 +67,9 @@ export default function Tasks({ token }) {
 
   return (
     <div>
-      <h1 style={{ marginBottom: '1.5rem' }}>Tasks & Reminders</h1>
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h2 style={{ marginBottom: '1rem' }}>New Task</h2>
+      <div className="page-header"><h1>Tasks & Reminders</h1><p>Track deadlines, priorities, and assignments</p></div>
+      <div className="card" style={{ marginBottom: '1.5rem' }}>
+        <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>✏️ New Task</h3>
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <input placeholder="Task title..." value={title} onChange={e => setTitle(e.target.value)} required style={{ margin: 0, flex: 1 }} />
