@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from app.models.review import AnalyticsResponse
 from app.core.database import db
 from app.core.security import decode_access_token
+from app.services.memory_service import memory_service
 from datetime import datetime
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
@@ -40,12 +40,22 @@ async def get_dashboard(token: str):
     mastered = [t for t, c in topic_counts.items() if c >= 3]
     struggling = [t for t, c in topic_counts.items() if c == 1]
 
-    return AnalyticsResponse(
-        total_notes=total_notes,
-        total_reviews=total_reviews,
-        memory_score=round(memory_score, 1),
-        topics_mastered=mastered,
-        topics_struggling=struggling,
-        reviews_due=reviews_due,
-        streak_days=total_reviews,
-    )
+    topic_strengths = await memory_service.get_topic_strengths(user_id)
+    weakest = await memory_service.get_weakest_topics(user_id, 5)
+    streak = await memory_service.get_learning_streak(user_id)
+    progress = await memory_service.weekly_progress(user_id)
+    forgotten = await memory_service.get_what_forgotten(user_id)
+
+    return {
+        "total_notes": total_notes,
+        "total_reviews": total_reviews,
+        "memory_score": round(memory_score, 1),
+        "topic_strengths": topic_strengths,
+        "weakest_topics": weakest,
+        "reviews_due": reviews_due,
+        "streak_days": streak,
+        "weekly_progress": progress,
+        "forgotten_notes": forgotten,
+        "topics_mastered": mastered,
+        "topics_struggling": struggling,
+    }

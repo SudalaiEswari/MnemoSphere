@@ -2,6 +2,7 @@ import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
+import InstallPrompt from './components/InstallPrompt'
 import Notes from './pages/Notes'
 import Review from './pages/Review'
 import Analytics from './pages/Analytics'
@@ -32,10 +33,12 @@ function App() {
   return (
     <div className="app">
       <nav className="navbar">
-        <div className="nav-brand">
-          <Link to="/">🧠 MnemoSphere</Link>
+        <div className="nav-left">
+          <button className="nav-toggle" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+          <div className="nav-brand">
+            <Link to="/">🧠 MnemoSphere</Link>
+          </div>
         </div>
-        <button className="nav-toggle" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
         <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
           {token ? (
             <>
@@ -56,6 +59,7 @@ function App() {
           )}
         </div>
       </nav>
+      <InstallPrompt />
       <main className="main-content">
         <Routes>
           <Route path="/" element={<Home token={token} setToken={setToken} />} />

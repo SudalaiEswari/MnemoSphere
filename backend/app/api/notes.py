@@ -4,6 +4,7 @@ from app.models.note import NoteResponse
 from app.services.llm_service import llm
 from app.services.vector_store import vector_store
 from app.services.scheduler import calculate_next_review
+from app.services.embedding import compute_embedding
 from app.core.database import db
 from app.core.security import decode_access_token
 import numpy as np
@@ -23,10 +24,7 @@ def _get_user_id(token: str) -> str:
 
 
 def _embedding(text: str) -> list[float]:
-    np.random.seed(hash(text) % (2**31))
-    vec = np.random.randn(384)
-    vec = vec / np.linalg.norm(vec)
-    return vec.tolist()
+    return compute_embedding(text)
 
 
 def _note_to_response(doc):
@@ -75,7 +73,7 @@ async def create_note(token: str, title: str, content: str, source_type: str = "
         "file_path": None,
     }
     note_id = await db.insert_one("notes", doc)
-    vector_store.add(note_id, embedding)
+    vector_store.add(note_id, content)
     return {"id": note_id, "summary": doc["summary"], "category": category, "tags": tag_list, "next_review": next_review.isoformat()}
 
 
@@ -128,7 +126,7 @@ async def upload_file(token: str = Form(...), title: str = Form(""), file: Uploa
         "file_path": filepath,
     }
     note_id = await db.insert_one("notes", doc)
-    vector_store.add(note_id, embedding)
+    vector_store.add(note_id, content_text)
     return {"id": note_id, "summary": doc["summary"], "category": category, "source_type": source_type, "file_path": filepath}
 
 

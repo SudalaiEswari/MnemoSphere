@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from app.core.config import settings
-from app.api import auth, notes, quiz, review, analytics, assistant, tasks, goals, habits, timeline, summary
+from app.api import auth, notes, quiz, review, analytics, assistant, tasks, goals, habits, timeline, summary, agent
 import os
 
 
@@ -41,6 +41,7 @@ app.include_router(goals.router)
 app.include_router(habits.router)
 app.include_router(timeline.router)
 app.include_router(summary.router)
+app.include_router(agent.router)
 
 
 @app.get("/health")

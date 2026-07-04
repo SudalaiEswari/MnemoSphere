@@ -46,6 +46,11 @@ body {
   top: 0;
   z-index: 100;
 }
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .nav-brand a {
   font-size: 1.25rem;
   font-weight: 800;
@@ -469,4 +474,71 @@ label {
   .main-content { padding: 1rem; }
   .page-header h1 { font-size: 1.35rem; }
   .stat-card h3 { font-size: 1.75rem; }
+}
+
+/* ─── Install Banner ─── */
+.install-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--gradient);
+  padding: 0.6rem 1.25rem;
+  margin: 0 auto;
+  max-width: 900px;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-size: 0.875rem;
+  animation: slideDown 0.3s ease;
+}
+.install-banner span { flex: 1; color: #fff; font-weight: 500; }
+.install-banner .btn-sm { padding: 0.35rem 1rem; font-size: 0.8rem; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+.install-banner .btn-sm:hover { background: rgba(255,255,255,0.3); }
+.install-banner .btn-close { background: none; border: none; color: #fff; font-size: 1.1rem; cursor: pointer; opacity: 0.7; padding: 0; line-height: 1; }
+.install-banner .btn-close:hover { opacity: 1; }
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ─── Buttons ─── */
+.btn-xs { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+.btn-group { display: flex; gap: 0.25rem; }
+.btn-voice {
+  padding: 0.5rem 0.7rem;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text);
+}
+.btn-voice:hover { background: rgba(124, 92, 252, 0.2); border-color: var(--primary); }
+.btn-voice.listening {
+  background: rgba(239, 71, 111, 0.2);
+  border-color: var(--danger);
+  animation: pulse 1s infinite;
+}
+
+/* ─── Animations ─── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulse { animation: pulse 1.2s infinite; }
+
+/* ─── Progress ─── */
+.progress-fill-bg {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+/* ─── Loading ─── */
+.loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
