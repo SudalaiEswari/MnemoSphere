@@ -21,7 +21,17 @@ async def generate_quiz(note_id: str, token: str):
     if not doc:
         raise HTTPException(404, "Note not found")
     score = min((doc.get("review_count", 0) or 0) * 20, 100)
-    questions = await llm.generate_personalized_quiz(doc["content"], score, [])
+    content = doc["content"]
+    if content.startswith("[") and content.endswith("]"):
+        return {"questions": [], "note_title": doc["title"], "error": "No extractable text"}
+    questions = await llm.generate_personalized_quiz(content[:3000], score, [])
+    if not questions:
+        try:
+            single = await llm.generate_quiz(content[:2000])
+            if single and "question" in single:
+                questions = [single]
+        except:
+            pass
     return {"questions": questions, "note_title": doc["title"]}
 
 

@@ -13,6 +13,10 @@ export default function Dashboard({ token }) {
     if (!token) return
     axios.get('/api/analytics/dashboard', { params: { token } }).then(r => setData(r.data))
     axios.get('/api/agent/today', { params: { token } }).then(r => setAgent(r.data))
+    const handler = () => window.dispatchEvent(new CustomEvent('openguide'))
+    const el = document.querySelector('.guide-banner')
+    if (el) el.addEventListener('click', handler)
+    return () => { if (el) el.removeEventListener('click', handler) }
   }, [token])
 
   if (!data) return <div className="loading">Loading dashboard...</div>
@@ -28,6 +32,13 @@ export default function Dashboard({ token }) {
       <div className="page-header">
         <h1>🧠 Memory Twin Dashboard</h1>
         <p>Your personal AI knows what you know</p>
+      </div>
+
+      {/* Guide Banner */}
+      <div className="guide-banner" onClick={() => window.dispatchEvent(new CustomEvent('openguide'))}>
+        <span>🆕</span>
+        <span style={{ flex: 1 }}><strong>How MnemoSphere works</strong> — notes → review → memory strength, reminders, and more</span>
+        <span className="btn btn-primary btn-xs">Open Guide</span>
       </div>
 
       {/* Stats Grid */}
@@ -210,6 +221,37 @@ export default function Dashboard({ token }) {
           <Link to="/goals" className="btn btn-secondary btn-sm">🎯 Goals</Link>
           <Link to="/habits" className="btn btn-secondary btn-sm">✅ Habits</Link>
           <Link to="/timeline" className="btn btn-secondary btn-sm">📅 Timeline</Link>
+        </div>
+      </div>
+
+      {/* Feature Connections */}
+      <div className="card" style={{ marginTop: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>🔗 How Everything Connects</h3>
+        <div className="flow-grid">
+          <div className="flow-node">
+            <div className="flow-icon">📝</div>
+            <div className="flow-label">Notes</div>
+            <div className="flow-desc">Add text, images, or voice</div>
+          </div>
+          <div className="flow-arrow">→</div>
+          <div className="flow-node">
+            <div className="flow-icon">🔄</div>
+            <div className="flow-label">Review</div>
+            <div className="flow-desc">AI quizzes on 1-3-7 schedule</div>
+          </div>
+          <div className="flow-arrow">→</div>
+          <div className="flow-node">
+            <div className="flow-icon">🧠</div>
+            <div className="flow-label">Memory Strength</div>
+            <div className="flow-desc">Scores grow as you review</div>
+          </div>
+        </div>
+        <div className="flow-note">
+          <strong>Standalone features:</strong> Tasks, Habits, Goals — track these independently. They appear in your Timeline and AI can give advice about them.
+        </div>
+        <div className="flow-note" style={{ marginTop: '0.5rem' }}>
+          <strong>🔔 Reminders:</strong> Enable browser notifications to get alerts for due reviews, overdue tasks, and pending habit check-ins. 
+          Open the <strong>Guide</strong> (❓ button) to learn more.
         </div>
       </div>
     </div>

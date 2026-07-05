@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from app.core.config import settings
 
 
-BASE_INTERVALS = [1, 3, 7, 14, 30]
+BASE_INTERVALS = [0, 1, 3, 7, 14, 30]
 
 
 def calculate_next_review(stage: int, score: float = None) -> datetime:

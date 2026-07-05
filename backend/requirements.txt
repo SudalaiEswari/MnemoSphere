@@ -11,3 +11,4 @@ python-multipart==0.0.12
 packaging==24.1
 aiofiles==24.1.0
 email-validator==2.2.0
+PyMuPDF==1.24.9

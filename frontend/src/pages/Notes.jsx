@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+import { useToast } from '../components/Toast'
 
 export default function Notes({ token }) {
+  const addToast = useToast()
   const [notes, setNotes] = useState([])
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tags, setTags] = useState('')
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState(null)
-  const [listening, setListening] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const recognitionRef = useRef(null)
+  const [preview, setPreview] = useState(null)
   const fileRef = useRef(null)
 
   useEffect(() => { if (token) loadNotes() }, [token])
@@ -22,11 +23,9 @@ export default function Notes({ token }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const params = new URLSearchParams()
-    params.append('token', token); params.append('title', title)
-    params.append('content', content); params.append('tags', tags)
-    await axios.post('/api/notes/', params)
-    setTitle(''); setContent(''); setTags('')
+    await axios.post('/api/notes/', null, { params: { token, title, content, tags } })
+    setTitle(''); setContent(''); setTags(''); setPreview(null)
+    addToast('Note saved! Scheduled for review tomorrow.', 'success', 4000)
     loadNotes()
   }
 
@@ -36,9 +35,20 @@ export default function Notes({ token }) {
     setUploading(true)
     const form = new FormData()
     form.append('token', token); form.append('title', file.name); form.append('file', file)
-    try { await axios.post('/api/notes/upload', form); loadNotes() }
-    catch (err) { alert('Upload failed: ' + (err.response?.data?.detail || err.message)) }
+    try {
+      const { data } = await axios.post('/api/notes/upload', form)
+      if (data.preview) {
+        setPreview(file)
+        setTitle(data.title)
+        setContent(data.content)
+        setTags(data.tags || '')
+        addToast('File uploaded! Edit the text then click Save Note.', 'success', 4000)
+      }
+    } catch (err) {
+      addToast('Upload failed: ' + (err.response?.data?.detail || err.message), 'warning', 5000)
+    }
     setUploading(false)
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   const handleDelete = async (id) => {
@@ -48,8 +58,14 @@ export default function Notes({ token }) {
 
   const handleSearch = async () => {
     if (!search.trim()) return setSearchResults(null)
-    const { data } = await axios.post('/api/notes/search', { token, query: search })
+    const { data } = await axios.post('/api/notes/search', null, { params: { token, query: search } })
     setSearchResults(data)
+  }
+
+  const clearPreview = () => {
+    setPreview(null)
+    setTitle(''); setContent(''); setTags('')
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   const displayNotes = searchResults !== null ? searchResults : notes
@@ -65,34 +81,28 @@ export default function Notes({ token }) {
       </div>
 
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>✏️ New Note</h3>
+        <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>
+          {preview ? '🖼️ Preview — Edit & Save' : '✏️ New Note'}
+        </h3>
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <input placeholder="Note title" value={title} onChange={e => setTitle(e.target.value)} required style={{ margin: 0, flex: 1 }} />
-            <button type="button" className={`btn ${listening ? 'btn-danger' : 'btn-secondary'} btn-sm`} onClick={() => {
-              const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-              if (!SR) { alert('Voice not supported. Use Chrome.'); return }
-              const r = new SR(); r.lang = 'en-US'
-              r.onresult = e => { setTitle(e.results[0][0].transcript); setListening(false) }
-              r.onend = () => setListening(false); r.start(); setListening(true)
-              recognitionRef.current = r
-            }} title="Voice input">🎤</button>
-          </div>
-          {listening && <p style={{ color: 'var(--danger)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>🎤 Listening...</p>}
+          <input placeholder="Note title" value={title} onChange={e => setTitle(e.target.value)} required style={{ marginBottom: '0.5rem' }} />
           <textarea placeholder="What did you learn today? Paste text from documents, books, or lectures..." value={content} onChange={e => setContent(e.target.value)} required />
           <input placeholder="Tags: python, algorithms, AI (comma-separated)" value={tags} onChange={e => setTags(e.target.value)} />
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button type="submit" className="btn btn-primary">💾 Save Note</button>
             <button type="button" className="btn btn-outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
-              {uploading ? '⏳ Uploading...' : '📎 Upload'}
+              {uploading ? '⏳ Processing...' : '📎 Upload Image / File'}
             </button>
+            {preview && (
+              <button type="button" className="btn btn-outline" onClick={clearPreview}>✕ Cancel</button>
+            )}
             <input ref={fileRef} type="file" accept="image/*,.pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
           </div>
         </form>
       </div>
 
       <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem' }}>
-        <input placeholder="Search notes by keyword..." value={search} onChange={e => setSearch(e.target.value)}
+        <input placeholder="Search notes by keyword or question..." value={search} onChange={e => setSearch(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSearch()} style={{ margin: 0 }} />
         <button className="btn btn-primary btn-sm" onClick={handleSearch}>🔍 Search</button>
         {searchResults && <button className="btn btn-outline btn-sm" onClick={() => { setSearchResults(null); setSearch('') }}>✕ Clear</button>}
@@ -113,12 +123,13 @@ export default function Notes({ token }) {
                 {note.category && <span className={`tag ${catClass(note.category)}`}>{note.category}</span>}
               </div>
               {note.summary && <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.5rem', lineHeight: 1.5 }}>{note.summary}</p>}
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '0.5rem', maxHeight: '3em', overflow: 'hidden' }}>{note.content?.slice(0, 120)}</p>
               {note.tags?.length > 0 && (
                 <div style={{ marginBottom: '0.5rem' }}>{note.tags.map(t => <span key={t} className="tag">{t}</span>)}</div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
                 <span>Stage {note.review_stage}/3</span>
-                <span>{note.next_review ? new Date(note.next_review).toLocaleDateString() : '✅ Complete'}</span>
+                <span>{note.next_review ? new Date(note.next_review).toLocaleDateString() : '✅ Mastered'}</span>
               </div>
               <button className="btn btn-danger btn-sm" style={{ width: '100%', marginTop: '0.75rem', justifyContent: 'center' }} onClick={() => handleDelete(note.id)}>Delete</button>
             </div>

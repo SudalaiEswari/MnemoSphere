@@ -31,7 +31,7 @@ export default function Assistant({ token }) {
     try {
       let data
       if (mode === 'twin') {
-        const resp = await axios.post('/api/agent/memory-twin', { token, query: q })
+        const resp = await axios.post('/api/agent/memory-twin', null, { params: { token, query: q } })
         data = resp.data
         setMessages(prev => [...prev, {
           role: 'assistant',
@@ -39,7 +39,7 @@ export default function Assistant({ token }) {
           meta: `Used ${data.related_notes} related notes · Weakest: ${data.weakest?.map?.(w => `${w[0]} (${w[1]}%)`).join(', ') || 'none'}`,
         }])
       } else {
-        const resp = await axios.post('/api/agent/ask', { token, question: q })
+        const resp = await axios.post('/api/agent/ask', null, { params: { token, question: q } })
         data = resp.data
         setMessages(prev => [...prev, {
           role: 'assistant',

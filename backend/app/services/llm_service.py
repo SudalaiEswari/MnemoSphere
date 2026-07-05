@@ -18,7 +18,7 @@ class LLMService:
     async def _call_groq(self, messages: list[dict]) -> str:
         if self._mock_mode:
             return self._mock_response(messages)
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.post(
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers={
@@ -124,7 +124,26 @@ class LLMService:
                 {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
             ]},
         ]
-        return await self._call_groq(messages)
+        vision_model = "llama-3.2-11b-vision-preview"
+        async with httpx.AsyncClient(timeout=30) as client:
+            try:
+                resp = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.groq_api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": vision_model,
+                        "messages": messages,
+                        "temperature": 0.3,
+                        "max_tokens": 2048,
+                    },
+                )
+                resp.raise_for_status()
+                return resp.json()["choices"][0]["message"]["content"]
+            except Exception as e:
+                return f"[Could not analyze image: {str(e)}]"
 
 
 llm = LLMService()

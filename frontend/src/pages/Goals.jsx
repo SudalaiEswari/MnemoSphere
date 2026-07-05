@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useToast } from '../components/Toast'
 
 export default function Goals({ token }) {
+  const addToast = useToast()
   const [goals, setGoals] = useState([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -17,19 +19,17 @@ export default function Goals({ token }) {
 
   const handleCreate = async (e) => {
     e.preventDefault()
-    const params = new URLSearchParams()
-    params.append('token', token); params.append('title', title)
-    params.append('description', description); params.append('category', category)
-    if (targetDate) params.append('target_date', targetDate)
-    await axios.post('/api/goals/', params)
+    const p = { token, title, description, category }
+    if (targetDate) p.target_date = targetDate
+    await axios.post('/api/goals/', null, { params: p })
     setTitle(''); setDescription(''); setTargetDate('')
+    addToast('Goal created!', 'goal', 4000)
     loadGoals()
   }
 
   const handleProgress = async (id, progress) => {
-    const params = new URLSearchParams()
-    params.append('token', token); params.append('progress', String(progress))
-    await axios.put(`/api/goals/${id}`, params)
+    await axios.put(`/api/goals/${id}`, null, { params: { token, progress: String(progress) } })
+    addToast(`Progress updated to ${progress}%!`, 'success', 4000)
     loadGoals()
   }
 

@@ -11,6 +11,7 @@ export default function Review({ token }) {
   const [score, setScore] = useState(0)
   const [total, setTotal] = useState(0)
   const [done, setDone] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     if (token) {
@@ -28,8 +29,14 @@ export default function Review({ token }) {
   }, [currentIndex, dueNotes])
 
   const loadQuestions = async (noteId) => {
-    const { data } = await axios.post('/api/quiz/generate', null, { params: { note_id: noteId, token } })
-    setQuestions(data.questions || [])
+    setLoaded(false)
+    try {
+      const { data } = await axios.post('/api/quiz/generate', null, { params: { note_id: noteId, token } })
+      setQuestions(data.questions || [])
+    } catch {
+      setQuestions([])
+    }
+    setLoaded(true)
     setCurrentQ(0)
     setSelected('')
     setAnswered(false)
@@ -48,13 +55,14 @@ export default function Review({ token }) {
   const nextQuestion = async () => {
     const q = questions[currentQ]
     if (q) {
-      await axios.post('/api/quiz/submit', {
+      await axios.post('/api/quiz/submit', null, { params: {
         note_id: dueNotes[currentIndex].id,
         question: q.question,
         user_answer: selected,
         correct_answer: q.correct_answer,
         is_correct: selected === q.correct_answer,
-      }, { params: { token } })
+        token,
+      } })
     }
     if (currentQ < questions.length - 1) {
       setCurrentQ(c => c + 1)
@@ -116,6 +124,16 @@ export default function Review({ token }) {
           <p style={{ color: 'var(--text-light)' }}>Score: {total > 0 ? Math.round(score / total * 100) : 0}%</p>
           <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={nextNote}>
             {currentIndex < dueNotes.length - 1 ? 'Next Note' : 'Finish All'}
+          </button>
+        </div>
+      ) : loaded && questions.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+          <h2>No questions available</h2>
+          <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+            Could not generate quiz for this note. The content may not have enough text.
+          </p>
+          <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={completeReview}>
+            Skip & Mark Reviewed
           </button>
         </div>
       ) : q ? (

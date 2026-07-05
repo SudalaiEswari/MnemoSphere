@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+import { useToast } from '../components/Toast'
 
 export default function Tasks({ token }) {
+  const addToast = useToast()
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -25,23 +27,17 @@ export default function Tasks({ token }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const params = new URLSearchParams()
-    params.append('token', token)
-    params.append('title', title)
-    params.append('description', description)
-    params.append('category', category)
-    params.append('priority', priority)
-    if (deadline) params.append('deadline', new Date(deadline).toISOString())
-    await axios.post('/api/tasks/', params)
+    const p = { token, title, description, category, priority }
+    if (deadline) p.deadline = new Date(deadline).toISOString()
+    await axios.post('/api/tasks/', null, { params: p })
     setTitle(''); setDescription(''); setDeadline('')
+    addToast('Task created!', 'task', 4000)
     loadTasks()
   }
 
   const handleStatus = async (id, status) => {
-    const params = new URLSearchParams()
-    params.append('token', token)
-    params.append('status', status)
-    await axios.put(`/api/tasks/${id}`, params)
+    await axios.put(`/api/tasks/${id}`, null, { params: { token, status } })
+    addToast(`Task ${status === 'completed' ? 'completed' : 'updated'}!`, 'success', 4000)
     loadTasks()
   }
 

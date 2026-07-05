@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useToast } from '../components/Toast'
 
 export default function Habits({ token }) {
+  const addToast = useToast()
   const [habits, setHabits] = useState([])
   const [name, setName] = useState('')
   const [frequency, setFrequency] = useState('daily')
@@ -16,18 +18,15 @@ export default function Habits({ token }) {
 
   const handleCreate = async (e) => {
     e.preventDefault()
-    const params = new URLSearchParams()
-    params.append('token', token); params.append('name', name)
-    params.append('frequency', frequency); params.append('category', category)
-    await axios.post('/api/habits/', params)
+    await axios.post('/api/habits/', null, { params: { token, name, frequency, category } })
     setName('')
+    addToast('Habit created!', 'habit', 4000)
     loadHabits()
   }
 
   const handleCheckin = async (id) => {
-    const params = new URLSearchParams()
-    params.append('token', token)
-    await axios.post(`/api/habits/${id}/checkin`, params)
+    await axios.post(`/api/habits/${id}/checkin`, null, { params: { token } })
+    addToast('Checked in! Keep your streak going!', 'habit', 4000)
     loadHabits()
   }
 

@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from app.core.config import settings
-from app.api import auth, notes, quiz, review, analytics, assistant, tasks, goals, habits, timeline, summary, agent
+from app.api import auth, notes, quiz, review, analytics, assistant, tasks, goals, habits, timeline, summary, agent, reminders
 import os
 
 
@@ -42,6 +43,7 @@ app.include_router(habits.router)
 app.include_router(timeline.router)
 app.include_router(summary.router)
 app.include_router(agent.router)
+app.include_router(reminders.router)
 
 
 @app.get("/health")
@@ -51,4 +53,14 @@ async def health():
 
 static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
 if os.path.isdir(static_dir):
-    app.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        if full_path.startswith("api/") or full_path.startswith("health"):
+            raise HTTPException(404)
+        file_path = os.path.join(static_dir, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        index_path = os.path.join(static_dir, "index.html")
+        if os.path.isfile(index_path):
+            return FileResponse(index_path, media_type="text/html")
+        raise HTTPException(404)

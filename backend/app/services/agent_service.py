@@ -125,7 +125,13 @@ class AgentService:
             "You know everything the user has learned. Answer using their notes. "
             "Point out connections they might have missed. "
             "If they're weak on a topic, suggest review. "
-            "Be personal, insightful, and proactive."
+            "Be personal, insightful, and proactive.\n\n"
+            "QUIZ HANDLING: If the user asks you to create a quiz or test them, "
+            "DO NOT generate quiz questions yourself. Instead, tell them to "
+            "go to the Review page (click 'Review' in the navbar) where they "
+            "can take proper interactive quizzes with scoring and spaced repetition. "
+            "If they answer something like 'c', 'a', 'b', 'd', or 'answer x', "
+            "remind them to use the Review page for quiz answers."
         )
         messages = [
             {"role": "system", "content": system_prompt},
